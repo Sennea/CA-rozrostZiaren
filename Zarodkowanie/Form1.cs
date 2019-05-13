@@ -48,7 +48,7 @@ namespace Zarodkowanie
             brush2 = new SolidBrush(Color.White);
             grains = new List<Grain>();
             steps = new List<int[,]>();
-            isPeriodic = true;
+            isPeriodic = false;
             isPrepared = false;
             isAvillableToStart = false;
             isNeuman = true;
@@ -397,6 +397,8 @@ namespace Zarodkowanie
                     }
                     if (added) break;
                 }
+                if (added == false)
+                    break;
                 added = false;
             }
 
@@ -474,7 +476,10 @@ namespace Zarodkowanie
             for (int i = 0; i < nodesPerWidth; ++i)
                 for (int j = 0; j < nodesPerHeight; ++j)
                 {
-                    g.FillRectangle(brush2, (i * PIXEL_SIZE + 1), (j * PIXEL_SIZE + 1), PIXEL_SIZE - 1, PIXEL_SIZE - 1);
+                    if(wantGrid)
+                        g.FillRectangle(brush2, (i * PIXEL_SIZE + 1), (j * PIXEL_SIZE + 1), PIXEL_SIZE - 1, PIXEL_SIZE - 1);
+                    else
+                        g.FillRectangle(brush2, (i * PIXEL_SIZE), (j * PIXEL_SIZE), PIXEL_SIZE, PIXEL_SIZE);
                 }
         }
 

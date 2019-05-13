@@ -209,6 +209,8 @@
             // checkBox2
             // 
             this.checkBox2.AutoSize = true;
+            this.checkBox2.Checked = true;
+            this.checkBox2.CheckState = System.Windows.Forms.CheckState.Checked;
             this.checkBox2.Location = new System.Drawing.Point(23, 78);
             this.checkBox2.Name = "checkBox2";
             this.checkBox2.Size = new System.Drawing.Size(119, 24);
@@ -220,8 +222,6 @@
             // checkBox1
             // 
             this.checkBox1.AutoSize = true;
-            this.checkBox1.Checked = true;
-            this.checkBox1.CheckState = System.Windows.Forms.CheckState.Checked;
             this.checkBox1.Location = new System.Drawing.Point(23, 39);
             this.checkBox1.Name = "checkBox1";
             this.checkBox1.Size = new System.Drawing.Size(91, 24);
@@ -382,6 +382,11 @@
             // randomNumericUpDown
             // 
             this.randomNumericUpDown.Location = new System.Drawing.Point(31, 90);
+            this.randomNumericUpDown.Maximum = new decimal(new int[] {
+            2000,
+            0,
+            0,
+            0});
             this.randomNumericUpDown.Name = "randomNumericUpDown";
             this.randomNumericUpDown.Size = new System.Drawing.Size(120, 26);
             this.randomNumericUpDown.TabIndex = 9;
