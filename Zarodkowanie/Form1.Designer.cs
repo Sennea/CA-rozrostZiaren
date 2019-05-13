@@ -60,6 +60,10 @@
             this.groupBox7 = new System.Windows.Forms.GroupBox();
             this.mooreCheckBox = new System.Windows.Forms.CheckBox();
             this.vonNeumanCheckBox = new System.Windows.Forms.CheckBox();
+            this.label6 = new System.Windows.Forms.Label();
+            this.trackBar1 = new System.Windows.Forms.TrackBar();
+            this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
+            this.noGridButton = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -73,10 +77,14 @@
             ((System.ComponentModel.ISupportInitialize)(this.randomNumericUpDown)).BeginInit();
             this.groupBox6.SuspendLayout();
             this.groupBox7.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.trackBar1)).BeginInit();
             this.SuspendLayout();
             // 
             // pictureBox1
             // 
+            this.pictureBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.pictureBox1.BackColor = System.Drawing.Color.White;
             this.pictureBox1.Location = new System.Drawing.Point(12, 12);
             this.pictureBox1.Name = "pictureBox1";
@@ -87,6 +95,7 @@
             // 
             // button1
             // 
+            this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button1.BackColor = System.Drawing.Color.PaleTurquoise;
             this.button1.Location = new System.Drawing.Point(998, 12);
             this.button1.Name = "button1";
@@ -134,6 +143,7 @@
             // 
             // button2
             // 
+            this.button2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button2.BackColor = System.Drawing.Color.PaleGreen;
             this.button2.Location = new System.Drawing.Point(998, 57);
             this.button2.Name = "button2";
@@ -145,14 +155,17 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox1.BackColor = System.Drawing.Color.AntiqueWhite;
+            this.groupBox1.Controls.Add(this.trackBar1);
+            this.groupBox1.Controls.Add(this.label6);
             this.groupBox1.Controls.Add(this.label1);
             this.groupBox1.Controls.Add(this.textBox1);
             this.groupBox1.Controls.Add(this.label2);
             this.groupBox1.Controls.Add(this.textBox2);
-            this.groupBox1.Location = new System.Drawing.Point(982, 431);
+            this.groupBox1.Location = new System.Drawing.Point(1203, 443);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(200, 131);
+            this.groupBox1.Size = new System.Drawing.Size(200, 264);
             this.groupBox1.TabIndex = 7;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "size";
@@ -170,6 +183,7 @@
             // 
             // clearButton
             // 
+            this.clearButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.clearButton.BackColor = System.Drawing.Color.PaleVioletRed;
             this.clearButton.Location = new System.Drawing.Point(998, 102);
             this.clearButton.Name = "clearButton";
@@ -181,6 +195,7 @@
             // 
             // groupBox2
             // 
+            this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox2.BackColor = System.Drawing.Color.AntiqueWhite;
             this.groupBox2.Controls.Add(this.checkBox2);
             this.groupBox2.Controls.Add(this.checkBox1);
@@ -228,6 +243,7 @@
             // 
             // groupBox3
             // 
+            this.groupBox3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox3.BackColor = System.Drawing.Color.AntiqueWhite;
             this.groupBox3.Controls.Add(this.RowNumericUpDown);
             this.groupBox3.Controls.Add(this.ColumnNumericUpDown);
@@ -271,6 +287,7 @@
             // 
             // groupBox4
             // 
+            this.groupBox4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox4.BackColor = System.Drawing.Color.AntiqueWhite;
             this.groupBox4.Controls.Add(this.label4);
             this.groupBox4.Controls.Add(this.label3);
@@ -341,6 +358,7 @@
             // 
             // groupBox5
             // 
+            this.groupBox5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox5.BackColor = System.Drawing.Color.AntiqueWhite;
             this.groupBox5.Controls.Add(this.label5);
             this.groupBox5.Controls.Add(this.randomNumericUpDown);
@@ -376,6 +394,7 @@
             // 
             // groupBox6
             // 
+            this.groupBox6.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox6.BackColor = System.Drawing.Color.AntiqueWhite;
             this.groupBox6.Controls.Add(this.nextButton);
             this.groupBox6.Controls.Add(this.previousButton);
@@ -410,10 +429,11 @@
             // 
             // groupBox7
             // 
+            this.groupBox7.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox7.BackColor = System.Drawing.Color.AntiqueWhite;
             this.groupBox7.Controls.Add(this.mooreCheckBox);
             this.groupBox7.Controls.Add(this.vonNeumanCheckBox);
-            this.groupBox7.Location = new System.Drawing.Point(982, 298);
+            this.groupBox7.Location = new System.Drawing.Point(982, 429);
             this.groupBox7.Name = "groupBox7";
             this.groupBox7.Size = new System.Drawing.Size(200, 122);
             this.groupBox7.TabIndex = 16;
@@ -444,12 +464,46 @@
             this.vonNeumanCheckBox.UseVisualStyleBackColor = true;
             this.vonNeumanCheckBox.Click += new System.EventHandler(this.vonNeumanCheckBox_Click);
             // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(6, 141);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(75, 20);
+            this.label6.TabIndex = 6;
+            this.label6.Text = "pixel Size";
+            // 
+            // trackBar1
+            // 
+            this.trackBar1.Location = new System.Drawing.Point(17, 176);
+            this.trackBar1.Maximum = 30;
+            this.trackBar1.Minimum = 2;
+            this.trackBar1.Name = "trackBar1";
+            this.trackBar1.Size = new System.Drawing.Size(165, 69);
+            this.trackBar1.TabIndex = 7;
+            this.trackBar1.Value = 10;
+            this.trackBar1.Scroll += new System.EventHandler(this.trackBar1_Scroll);
+            // 
+            // noGridButton
+            // 
+            this.noGridButton.AutoSize = true;
+            this.noGridButton.Checked = true;
+            this.noGridButton.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.noGridButton.Location = new System.Drawing.Point(981, 256);
+            this.noGridButton.Name = "noGridButton";
+            this.noGridButton.Size = new System.Drawing.Size(216, 24);
+            this.noGridButton.TabIndex = 17;
+            this.noGridButton.Text = "I don\'t want this shitti gridi";
+            this.noGridButton.UseVisualStyleBackColor = true;
+            this.noGridButton.Click += new System.EventHandler(this.noGridButton_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.SeaShell;
             this.ClientSize = new System.Drawing.Size(1409, 732);
+            this.Controls.Add(this.noGridButton);
             this.Controls.Add(this.groupBox7);
             this.Controls.Add(this.groupBox6);
             this.Controls.Add(this.groupBox5);
@@ -463,6 +517,7 @@
             this.Controls.Add(this.pictureBox1);
             this.Name = "Form1";
             this.Text = "Form1";
+            this.ResizeEnd += new System.EventHandler(this.Form1_ResizeEnd);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
@@ -481,7 +536,9 @@
             this.groupBox6.ResumeLayout(false);
             this.groupBox7.ResumeLayout(false);
             this.groupBox7.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.trackBar1)).EndInit();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -519,6 +576,10 @@
         private System.Windows.Forms.GroupBox groupBox7;
         private System.Windows.Forms.CheckBox mooreCheckBox;
         private System.Windows.Forms.CheckBox vonNeumanCheckBox;
+        private System.Windows.Forms.TrackBar trackBar1;
+        private System.Windows.Forms.Label label6;
+        private System.ComponentModel.BackgroundWorker backgroundWorker1;
+        private System.Windows.Forms.CheckBox noGridButton;
     }
 }
 

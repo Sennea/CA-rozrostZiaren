@@ -18,6 +18,7 @@ namespace Zarodkowanie
         private SolidBrush brush;
         private SolidBrush brush2;
         private int[,] seedTab;
+        private int[,] seedTabTriangle;
         private int[,] seedTabNew;
         private int nodesPerWidth;
         private int nodesPerHeight;
@@ -28,12 +29,14 @@ namespace Zarodkowanie
         private Boolean isPeriodic;
         private Boolean isPrepared;
         private Boolean isNeuman;
+        private Boolean wantGrid;
+        private Boolean isAvillableToStart;
         private int currentStep;
 
 
         public int PIXEL_SIZE;
         public int PIXEL_SIZE_TMP;
-        public readonly int DEFAULT_SIZE = 10;
+        public readonly int DEFAULT_SIZE = 9;
 
         public Form1()
         {
@@ -47,7 +50,9 @@ namespace Zarodkowanie
             steps = new List<int[,]>();
             isPeriodic = true;
             isPrepared = false;
+            isAvillableToStart = false;
             isNeuman = true;
+            wantGrid = false;
             currentStep = 0;
             dissableButtonsAtStart();
 
@@ -60,6 +65,12 @@ namespace Zarodkowanie
 
             nodesPerWidth = int.Parse(textBox1.Text);
             nodesPerHeight = int.Parse(textBox2.Text);
+
+
+            seedTabTriangle = new int[nodesPerWidth * 2, nodesPerHeight * 2];
+            for (int i = 0; i < nodesPerWidth * 2; ++i)
+                for (int j = 0; j < nodesPerHeight * 2; ++j)
+                    seedTabTriangle[i, j] = 0;
         }
 
 
@@ -145,7 +156,7 @@ namespace Zarodkowanie
                 List<int> mosts = new List<int>();
                 for (int i = 0; i < grains.Count; ++i)
                     if (neighbours[i] == max)
-                        mosts.Add(i + 1);
+                        mosts.Add(i +1);
 
                 int index = random.Next(mosts.Count);
                 seedTabNew[x, y] = mosts[index];
@@ -208,7 +219,52 @@ namespace Zarodkowanie
         }
 
 
+        private void hexagonal(int x, int y)
+        {
+            int[] neighbours = new int[grains.Count];
+            for (int i = 0; i < grains.Count; ++i)
+                neighbours[i] = 0;
+            int left = x - 1;
+            int right = x + 1;
+            int up = y - 1;
+            int down = y + 1;
+            if (!isPeriodic)
+            {
+                if (left < 0) left = 0;
+                if (right >= nodesPerWidth) right = nodesPerWidth - 1;
+                if (up < 0) up = 0;
+                if (down >= nodesPerHeight) down = nodesPerHeight - 1;
+            }
+            else
+            {
+                if (left < 0) left = nodesPerWidth - 1;
+                if (right >= nodesPerWidth) right = 0;
+                if (up < 0) up = nodesPerHeight - 1;
+                if (down >= nodesPerHeight) down = 0;
+            }
 
+
+            if (seedTab[left, y] != 0) neighbours[seedTab[left, y] - 1]++;
+            if (seedTab[right, y] != 0) neighbours[seedTab[right, y] - 1]++;
+            if (seedTab[x, up] != 0) neighbours[seedTab[x, up] - 1]++;
+            if (seedTab[x, down] != 0) neighbours[seedTab[x, down] - 1]++;
+
+            int max = 0;
+            for (int i = 0; i < grains.Count; ++i)
+                if (neighbours[i] > max)
+                    max = neighbours[i];
+
+            if (max != 0)
+            {
+                List<int> mosts = new List<int>();
+                for (int i = 0; i < grains.Count; ++i)
+                    if (neighbours[i] == max)
+                        mosts.Add(i + 1);
+
+                int index = random.Next(mosts.Count);
+                seedTabNew[x, y] = mosts[index];
+            }
+        }
 
 
 
@@ -218,15 +274,19 @@ namespace Zarodkowanie
 
         private void startButton_Click(object sender, EventArgs e)
         {
+            
             prepare();
-            do
+            if(isAvillableToStart)
             {
-                disableButtons();
-                countNextStep();
-                checkIfEmpty();
-                //System.Threading.Thread.Sleep(50);
-            } while (empty == 0);
-            enableButtons();
+                do
+                {
+                    disableButtons();
+                    countNextStep();
+                    checkIfEmpty();
+                    //System.Threading.Thread.Sleep(50);
+                } while (empty == 0);
+                enableButtons();
+            }
         }
 
         private void nextButton_Click(object sender, EventArgs e)
@@ -253,6 +313,7 @@ namespace Zarodkowanie
 
         private void previousButton_Click(object sender, EventArgs e)
         {
+            isAvillableToStart = true;
             nextButton.Enabled = true;
             empty = 0;
             if (currentStep > 0)
@@ -267,6 +328,7 @@ namespace Zarodkowanie
 
         private void randomButton_Click(object sender, EventArgs e)
         {
+            isAvillableToStart = true;
             prepare();
             int amount = Convert.ToInt32(randomNumericUpDown.Value);
             int breakPoint = 0;
@@ -291,6 +353,7 @@ namespace Zarodkowanie
 
         private void collumnsRowButton_Click(object sender, EventArgs e)
         {
+            isAvillableToStart = true;
             prepare();
             int numberInColumn = Convert.ToInt32(ColumnNumericUpDown.Value);
             int numberInRow = Convert.ToInt32(RowNumericUpDown.Value);
@@ -312,6 +375,7 @@ namespace Zarodkowanie
 
         private void radiusAmountButton_Click(object sender, EventArgs e)
         {
+            isAvillableToStart = true;
             prepare();
             int radius = Convert.ToInt32(RadiusNumericUpDown.Value);
             int amount = Convert.ToInt32(AmountNumericUpDown.Value);
@@ -340,6 +404,7 @@ namespace Zarodkowanie
 
         private void pictureBox1_MouseClick(object sender, MouseEventArgs e)
         {
+            isAvillableToStart = true;
             int x = e.X / PIXEL_SIZE;
             int y = e.Y / PIXEL_SIZE;
 
@@ -368,9 +433,20 @@ namespace Zarodkowanie
         }
 
 
+        private void trackBar1_Scroll(object sender, EventArgs e)
+        {
+            PIXEL_SIZE = trackBar1.Value;
+            textBox2.Text = (pictureBox1.Height / PIXEL_SIZE).ToString();
+            textBox1.Text = (pictureBox1.Width / PIXEL_SIZE).ToString();
+        }
 
 
+        private void Form1_ResizeEnd(object sender, EventArgs e)
+        {
+            g = pictureBox1.CreateGraphics();
+        }
 
+       
 
 
 
@@ -492,35 +568,41 @@ namespace Zarodkowanie
 
 
 
+        private void drawTriangleGrid()
+        {
+            drawGrid();
+            for (int i = 0; i <= nodesPerHeight-1; ++i)
+                for(int j=0; j<= nodesPerWidth-1; ++j)
+                {
+                    g.DrawLine(pen, j*PIXEL_SIZE, i * PIXEL_SIZE, (j+1) * PIXEL_SIZE, (i+1) * PIXEL_SIZE);
+                }
+        }
 
         private void drawGrid()
         {
             nodesPerWidth = int.Parse(textBox1.Text);
             nodesPerHeight = int.Parse(textBox2.Text);
 
-            for (int i = 0; i < nodesPerHeight; ++i)
-                g.DrawLine(pen, 0, i * PIXEL_SIZE, nodesPerWidth * PIXEL_SIZE, i * PIXEL_SIZE);
-
-            for (int i = 0; i < nodesPerWidth; ++i)
-                g.DrawLine(pen, i * PIXEL_SIZE, 0, i * PIXEL_SIZE, PIXEL_SIZE * nodesPerHeight);
-
-        }
-
-
-        private void drawCurrentWithColor(int[,] tab, int pos, int iteracja, SolidBrush brushMy)
-        {
-            if (tab[pos, iteracja] != 0)
+            if (wantGrid)
             {
-                g.FillRectangle(brushMy, (pos * PIXEL_SIZE + 1), (iteracja * PIXEL_SIZE + 1), PIXEL_SIZE - 1, PIXEL_SIZE - 1);
+                for (int i = 0; i <= nodesPerHeight; ++i)
+                    g.DrawLine(pen, 0, i * PIXEL_SIZE, (nodesPerWidth) * PIXEL_SIZE, i * PIXEL_SIZE);
+
+                for (int i = 0; i <= nodesPerWidth; ++i)
+                    g.DrawLine(pen, i * PIXEL_SIZE, 0, i * PIXEL_SIZE, PIXEL_SIZE * (nodesPerHeight));
             }
         }
+
 
         private void drawCurrent( int x, int y)
         {
             if (seedTab[x, y] != 0)
             {
                 int val = seedTab[x, y];
-                g.FillRectangle(grains[val-1].getBrush(), (x * PIXEL_SIZE + 1), (y * PIXEL_SIZE + 1), PIXEL_SIZE - 1, PIXEL_SIZE - 1);
+                if(wantGrid)
+                    g.FillRectangle(grains[val-1].getBrush(), (x * PIXEL_SIZE + 1), (y * PIXEL_SIZE + 1), PIXEL_SIZE - 1, PIXEL_SIZE - 1);
+                else
+                    g.FillRectangle(grains[val - 1].getBrush(), (x * PIXEL_SIZE ), (y * PIXEL_SIZE ), PIXEL_SIZE , PIXEL_SIZE);
             }
         }
 
@@ -529,7 +611,10 @@ namespace Zarodkowanie
             if (tab[x, y] != 0)
             {
                 int val = seedTab[x, y];
-                g.FillRectangle(grains[val - 1].getBrush(), (x * PIXEL_SIZE + 1), (y * PIXEL_SIZE + 1), PIXEL_SIZE - 1, PIXEL_SIZE - 1);
+                if(wantGrid)
+                    g.FillRectangle(grains[val - 1].getBrush(), (x * PIXEL_SIZE + 1), (y * PIXEL_SIZE + 1), PIXEL_SIZE - 1, PIXEL_SIZE - 1);
+                else
+                    g.FillRectangle(grains[val - 1].getBrush(), (x * PIXEL_SIZE), (y * PIXEL_SIZE), PIXEL_SIZE , PIXEL_SIZE);
             }
         }
 
@@ -537,7 +622,10 @@ namespace Zarodkowanie
         {
             if (tab[pos, iteracja] != 0)
             {
-                g.FillRectangle(brush2, (pos * PIXEL_SIZE + 1), (iteracja * PIXEL_SIZE + 1), PIXEL_SIZE - 1, PIXEL_SIZE - 1);
+                if(wantGrid)
+                    g.FillRectangle(brush2, (pos * PIXEL_SIZE + 1), (iteracja * PIXEL_SIZE + 1), PIXEL_SIZE - 1, PIXEL_SIZE - 1);
+                else
+                    g.FillRectangle(brush2, (pos * PIXEL_SIZE), (iteracja * PIXEL_SIZE ), PIXEL_SIZE, PIXEL_SIZE);
             }
         }
 
@@ -572,6 +660,10 @@ namespace Zarodkowanie
             textBox2.Enabled = false;
             checkBox1.Enabled = false;
             checkBox2.Enabled = false;
+            trackBar1.Enabled = false;
+            vonNeumanCheckBox.Enabled = false;
+            mooreCheckBox.Enabled = false;
+            noGridButton.Enabled = false;
         }
 
         private void enableButtons()
@@ -586,6 +678,10 @@ namespace Zarodkowanie
             textBox2.Enabled = true;
             checkBox1.Enabled = true;
             checkBox2.Enabled = true;
+            trackBar1.Enabled = true;
+            vonNeumanCheckBox.Enabled = true;
+            mooreCheckBox.Enabled = true;
+            noGridButton.Enabled = true;
         }
 
         private void dissableButtonsAtStart()
@@ -604,6 +700,19 @@ namespace Zarodkowanie
 
 
 
+        private void noGridButton_Click(object sender, EventArgs e)
+        {
+            if (noGridButton.Checked == false)
+            {
+                noGridButton.Checked = false;
+                wantGrid = true;
+            }
+            else
+            {
+                noGridButton.Checked = true;
+                wantGrid = false;
+            }
+        }
 
         private void vonNeumanCheckBox_Click(object sender, EventArgs e)
         {
@@ -671,6 +780,7 @@ namespace Zarodkowanie
 
         private void clearButton_Click(object sender, EventArgs e)
         {
+            isAvillableToStart = false;
             seedEmptyTab();
             g.Clear(Color.White);
             currentStep = 0;
@@ -684,8 +794,6 @@ namespace Zarodkowanie
             dissableButtonsAtStart();
 
         }
-
-
 
         private void ColumnNumericUpDown_ValueChanged(object sender, EventArgs e)
         {
@@ -717,11 +825,21 @@ namespace Zarodkowanie
         private void radiusNumericUpDown2_ValueChanged(object sender, EventArgs e)
         {
             int smaller = nodesPerWidth < nodesPerHeight ? nodesPerWidth : nodesPerHeight;
-            if (RadiusNumericUpDown.Value >= (smaller / AmountNumericUpDown.Value))
-                RadiusNumericUpDown.Value = (smaller / AmountNumericUpDown.Value);
+            if (AmountNumericUpDown.Value == 1)
+            {
+                int max = (smaller / 2 - 1);
+                if (RadiusNumericUpDown.Value >= (max / AmountNumericUpDown.Value))
+                    RadiusNumericUpDown.Value = max;
+            }
+            else
+            {
+                if (RadiusNumericUpDown.Value >= (smaller / AmountNumericUpDown.Value))
+                    RadiusNumericUpDown.Value = (smaller / AmountNumericUpDown.Value);
 
-            if (RadiusNumericUpDown.Value < 1)
-                RadiusNumericUpDown.Value = 1;
+                if (RadiusNumericUpDown.Value < 1)
+                    RadiusNumericUpDown.Value = 1;
+            }
+           
         }
 
         private void randomNumericUpDown_ValueChanged(object sender, EventArgs e)
