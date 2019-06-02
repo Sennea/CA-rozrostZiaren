@@ -21,6 +21,7 @@ namespace Zarodkowanie
         {
             int a;
             int b;
+            
 
             for (int i = (x - (int)circularRadius); i <= (x + (int)circularRadius); ++i)
                 for (int j = (y - (int)circularRadius); j <= (y + (int)circularRadius); ++j)

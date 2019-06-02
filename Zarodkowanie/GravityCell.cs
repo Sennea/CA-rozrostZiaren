@@ -14,6 +14,8 @@ namespace Zarodkowanie
         private int value;
         private int positionX;
         private int positionY;
+        private float dislocationDensity;
+        private bool recrystalizzed;
 
         public GravityCell(float gX, float gY, int v, int pX, int pY)
         {
@@ -23,6 +25,28 @@ namespace Zarodkowanie
             this.energy = 0;
             positionX = pX;
             positionY = pY;
+            dislocationDensity = 0;
+            recrystalizzed = false;
+        }
+
+        public float getDislocationDensity()
+        {
+            return dislocationDensity;
+        }
+
+        public void setDislocationDensity(float d)
+        {
+            dislocationDensity = d;
+        }
+
+        public bool IsRecrystalized()
+        {
+            return recrystalizzed;
+        }
+
+        public void setRecrystalized(bool r)
+        {
+            this.recrystalizzed = r;
         }
 
         public int GetPositionX()
