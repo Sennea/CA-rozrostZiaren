@@ -40,6 +40,8 @@
             this.ktSelector = new System.Windows.Forms.NumericUpDown();
             this.label7 = new System.Windows.Forms.Label();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.iteracjaTextBox = new System.Windows.Forms.TextBox();
+            this.label9 = new System.Windows.Forms.Label();
             this.dislocationButton = new System.Windows.Forms.Button();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
@@ -84,6 +86,7 @@
             this.nextButton = new System.Windows.Forms.Button();
             this.previousButton = new System.Windows.Forms.Button();
             this.tabControl1 = new System.Windows.Forms.TabControl();
+            this.showDensityButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.groupBox8.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.ktSelector)).BeginInit();
@@ -236,6 +239,9 @@
             // 
             // tabPage2
             // 
+            this.tabPage2.Controls.Add(this.showDensityButton);
+            this.tabPage2.Controls.Add(this.iteracjaTextBox);
+            this.tabPage2.Controls.Add(this.label9);
             this.tabPage2.Controls.Add(this.dislocationButton);
             this.tabPage2.Controls.Add(this.groupBox8);
             this.tabPage2.Controls.Add(this.showGravityButton);
@@ -247,6 +253,22 @@
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "tabPage2";
             this.tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // iteracjaTextBox
+            // 
+            this.iteracjaTextBox.Location = new System.Drawing.Point(113, 372);
+            this.iteracjaTextBox.Name = "iteracjaTextBox";
+            this.iteracjaTextBox.Size = new System.Drawing.Size(100, 26);
+            this.iteracjaTextBox.TabIndex = 6;
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(23, 378);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(62, 20);
+            this.label9.TabIndex = 5;
+            this.label9.Text = "Iteracja";
             // 
             // dislocationButton
             // 
@@ -649,7 +671,7 @@
             this.trackBar1.Name = "trackBar1";
             this.trackBar1.Size = new System.Drawing.Size(165, 69);
             this.trackBar1.TabIndex = 7;
-            this.trackBar1.Value = 10;
+            this.trackBar1.Value = 5;
             this.trackBar1.Scroll += new System.EventHandler(this.TrackBar1_Scroll);
             // 
             // label6
@@ -792,6 +814,16 @@
             this.tabControl1.Size = new System.Drawing.Size(438, 757);
             this.tabControl1.TabIndex = 18;
             // 
+            // showDensityButton
+            // 
+            this.showDensityButton.Location = new System.Drawing.Point(17, 229);
+            this.showDensityButton.Name = "showDensityButton";
+            this.showDensityButton.Size = new System.Drawing.Size(75, 23);
+            this.showDensityButton.TabIndex = 7;
+            this.showDensityButton.Text = "Density";
+            this.showDensityButton.UseVisualStyleBackColor = true;
+            this.showDensityButton.Click += new System.EventHandler(this.showDensityButton_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
@@ -808,6 +840,7 @@
             this.groupBox8.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.ktSelector)).EndInit();
             this.tabPage2.ResumeLayout(false);
+            this.tabPage2.PerformLayout();
             this.tabPage1.ResumeLayout(false);
             this.tabPage1.PerformLayout();
             this.groupBox5.ResumeLayout(false);
@@ -891,6 +924,9 @@
         private System.Windows.Forms.TabControl tabControl1;
         private System.Windows.Forms.Button monteCarloCancelButton;
         private System.Windows.Forms.Button dislocationButton;
+        private System.Windows.Forms.TextBox iteracjaTextBox;
+        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.Button showDensityButton;
     }
 }
 

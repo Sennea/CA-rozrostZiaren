@@ -35,20 +35,20 @@ namespace Zarodkowanie
 
             return neighbourhood.GetBiggestNaighbour(neighbours,x,y);
         }
-        public List<int> GetNeighbourValues(int x, int y)
+        public List<GravityCell> GetNeighbours(int x, int y)
         {
             int[] closeNeighbours = neighbourhood.GetPeriodicIndex(x, y);
             int left = closeNeighbours[0];
             int right = closeNeighbours[1];
             int up = closeNeighbours[2];
             int down = closeNeighbours[3];
-            List<int> neighboursVal = new List<int>();
-            neighboursVal.Add(neighbourhood.GetSeedTab()[left, y].GetValue());
-            neighboursVal.Add(neighbourhood.GetSeedTab()[right, y].GetValue());
-            neighboursVal.Add(neighbourhood.GetSeedTab()[x, up].GetValue());
-            neighboursVal.Add(neighbourhood.GetSeedTab()[x, down].GetValue());
+            List<GravityCell> neighbours = new List<GravityCell>();
+            neighbours.Add(neighbourhood.GetSeedTab()[left, y]);
+            neighbours.Add(neighbourhood.GetSeedTab()[right, y]);
+            neighbours.Add(neighbourhood.GetSeedTab()[x, up]);
+            neighbours.Add(neighbourhood.GetSeedTab()[x, down]);
 
-            return neighboursVal;
+            return neighbours;
         }
     }
 }

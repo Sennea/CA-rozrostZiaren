@@ -19,7 +19,6 @@ namespace Zarodkowanie
         private SolidBrush brush;
         private SolidBrush brush2;
         private SolidBrush gravityBrush;
-        private SolidBrush blackBrush;
         private GravityCell[,] seedTab;
         private GravityCell[,] seedTabNew;
         private int nodesPerWidth;
@@ -27,6 +26,10 @@ namespace Zarodkowanie
         public static Random random = new Random();
         private List<Grain> grains;
         private List<GravityCell[,]> steps;
+        private List<GravityCell> grainsOnBorder = new List<GravityCell>();
+        private List<GravityCell> grainsInMiddle = new List<GravityCell>();
+        private List<GravityCell> lastRecrystalized = new List<GravityCell>();
+        private List<GravityCell> currentlyRecrystalized = new List<GravityCell>();
         private int empty;
         private Boolean isPeriodic;
         private Boolean isPrepared;
@@ -45,13 +48,14 @@ namespace Zarodkowanie
 
         public readonly float A = (float)8.6711E+13;
         public readonly float B = (float)9.41E+00;
-        public readonly float CRITICAL_DISLOCATION = (float)(4.21584E+12/3294);
+        public float CRITICAL_DISLOCATION = (float)(4.21584E+12);
         public static double DELTA_TIME = 0.001;
         public static double START_TIME = 0;
         public static double END_TIME = 0.2;
-        public static int PIXEL_SIZE ;
+        public static int PIXEL_SIZE;
         public int PIXEL_SIZE_TMP;
-        public readonly int DEFAULT_SIZE = 9;
+        public readonly int DEFAULT_SIZE = 5;
+        public static float DISLOCATION_PER_STEP;
 
         public Form1()
         {
@@ -62,7 +66,6 @@ namespace Zarodkowanie
             brush = new SolidBrush(Color.Black);
             brush2 = new SolidBrush(Color.White);
             gravityBrush = new SolidBrush(Color.Red);
-            blackBrush = new SolidBrush(Color.Black);
             grains = new List<Grain>();
             steps = new List<GravityCell[,]>();
             isPeriodic = false;
@@ -88,6 +91,7 @@ namespace Zarodkowanie
 
             nodesPerWidth = int.Parse(textBox1.Text);
             nodesPerHeight = int.Parse(textBox2.Text);
+
         }
 
 
@@ -156,108 +160,213 @@ namespace Zarodkowanie
 
 
 
-        private void CountDislocation(double t, StreamWriter sw)
+        private void CountDislocation(double t, Neighbourhood neighbourhood, StreamWriter sw)
         {
             float dislocation = A / B + (1 - A / B) * (float)Math.Exp(-B * t);
-            sw.Write("{0,-15}", dislocation);
+            float deltaDislocation = 0;
+            sw.Write(dislocation + ";");
             dislocations.Add(dislocation);
-        }
 
-        private void CountAverageDislocation(double t, Neighbourhood neighbourhood, StreamWriter sw)
-        {
-            if (t < START_TIME + DELTA_TIME)
-            {
-                sw.Write("{0,-15} \n", 0);
-                return;
-            }
+            if (t == START_TIME)
+                deltaDislocation = dislocation;
+            else
+                deltaDislocation = dislocations[(int)(t / DELTA_TIME)] - dislocations[(int)((t - DELTA_TIME) / DELTA_TIME)];
 
-            float deltaDislocation = dislocations[(int)(t / DELTA_TIME)] - dislocations[(int)((t - DELTA_TIME) / DELTA_TIME)];
-            sw.Write("{0,-15} \n", deltaDislocation);
-            float percent = 0.3f * deltaDislocation;
+
+            float deltaPerOne = deltaDislocation / (nodesPerHeight * nodesPerWidth);
+            float percent = 0.2f * deltaPerOne;
+
             RedistribuateStartDislocation(percent);
-            RedistrobuateRestDislocation(deltaDislocation - percent, neighbourhood);
-        }
+            RedistrobuateRestDislocation((deltaDislocation - (percent*(nodesPerHeight * nodesPerWidth)  )), sw);
+            Nucleation(neighbourhood);
+            Recrystalization(neighbourhood);
+            for (int i = 0; i < lastRecrystalized.Count; ++i)
+            {
+                seedTab[lastRecrystalized[i].GetPositionX(), lastRecrystalized[i].GetPositionY()].setLastRecrystalized(false);
+                lastRecrystalized.Remove(lastRecrystalized[i]);
+            }
+            for (int i = 0; i < currentlyRecrystalized.Count; ++i)
+            {
+                lastRecrystalized.Add(currentlyRecrystalized[i]);
+                seedTab[currentlyRecrystalized[i].GetPositionX(), currentlyRecrystalized[i].GetPositionY()].setLastRecrystalized(true);
+                currentlyRecrystalized.Remove(currentlyRecrystalized[i]);
+            }
         
-        private void RedistribuateStartDislocation(float value)
-        {
-            value /= ((nodesPerHeight - 1) * (nodesPerWidth - 1));
-            for(int i =0; i< nodesPerWidth; ++i)
+            sw.Write( DISLOCATION_PER_STEP+";");
+            float dislocationStayed = 0;
+            for(int i=0; i< nodesPerWidth; ++i)
                 for(int j=0; j< nodesPerHeight; ++j)
                 {
+                    dislocationStayed += seedTab[i, j].getDislocationDensity();
+                }
+            sw.Write(dislocationStayed+ "\n");
+
+        }
+
+        private void RedistribuateStartDislocation(float value)
+        {
+            for (int i = 0; i < nodesPerWidth; ++i)
+                for (int j = 0; j < nodesPerHeight; ++j)
+                {
+                    DISLOCATION_PER_STEP += value;
                     seedTab[i, j].setDislocationDensity(seedTab[i, j].getDislocationDensity() + value);
                 }
         }
 
-        private void RedistrobuateRestDislocation(float value, Neighbourhood neighbourhood)
+        private void RedistrobuateRestDislocation(float value, StreamWriter sw)
         {
-            List<int> neighboursValues = new List<int>();
 
-            bool seeded = false;
-            float dislocationPackage = 0;
+            float dislocationPackage = 0.001f * value;
             do
             {
-                dislocationPackage = (float)random.NextDouble() * value;
                 value -= dislocationPackage;
+                DISLOCATION_PER_STEP += dislocationPackage;
 
-                do
+                int probability = random.Next(100);
+                if (probability < 80)
                 {
-                    int x = random.Next(nodesPerWidth-1);
-                    int y = random.Next(nodesPerHeight-1);
-                    neighboursValues = GetNeighboursValues(x, y, neighbourhood);
-                    if(neighboursValues.Count >=3)
-                    {
-                        int probability = random.Next(0,100);
-                        if(probability <= 80)
-                        {
-                            seedTab[x, y].setDislocationDensity(seedTab[x, y].getDislocationDensity() + dislocationPackage);
-                            seeded = true;
-                        }
-                    }
-                    else
-                    {
-                        int probability = random.Next(0,100);
-                        if (probability <= 20)
-                        {
-                            seedTab[x, y].setDislocationDensity(seedTab[x, y].getDislocationDensity() + dislocationPackage);
-                            seeded = true;
-                        }
-                    }
-                } while (!seeded);
-                seeded = false;
+                    int randomGrain = random.Next(grainsOnBorder.Count);
+                    int x = grainsOnBorder[randomGrain].GetPositionX();
+                    int y = grainsOnBorder[randomGrain].GetPositionY();
+                    seedTab[x, y].setDislocationDensity(seedTab[x, y].getDislocationDensity() + dislocationPackage);
+                }
+                else
+                {
+                    int randomGrain = random.Next(grainsInMiddle.Count);
+                    int x = grainsInMiddle[randomGrain].GetPositionX();
+                    int y = grainsInMiddle[randomGrain].GetPositionY();
+                    seedTab[x, y].setDislocationDensity(seedTab[x, y].getDislocationDensity() + dislocationPackage);
+                }
 
-            } while (value > 0 );
+            } while (value >= dislocationPackage);
         }
 
-
-
-        private int GetNonZeroNeighbours(List<int> neighbours)
+        private void Nucleation(Neighbourhood neighbourhood)
         {
-            int count = 0;
-            foreach(int neig in neighbours)
+            foreach(GravityCell grain in grainsOnBorder)
             {
-                if (neig != 0)
-                    count++;
+                if (seedTab[grain.GetPositionX(), grain.GetPositionY()].getDislocationDensity() > CRITICAL_DISLOCATION)
+                {
+                    seedTab[grain.GetPositionX(), grain.GetPositionY()].setDislocationDensity(CRITICAL_DISLOCATION);
+                    currentlyRecrystalized.Add(seedTab[grain.GetPositionX(), grain.GetPositionY()]);
+                    if(!seedTab[grain.GetPositionX(), grain.GetPositionY()].IsRecrystalized())
+                         drawDislocation(grain.GetPositionX(), grain.GetPositionY());
+                    seedTab[grain.GetPositionX(), grain.GetPositionY()].setRecrystalized(true);
+                    
+                }
             }
-            return count;
+        }
+
+        private void Recrystalization(Neighbourhood neighbourhood)
+        {
+            for(int i=0;i< nodesPerWidth; ++i)
+                for(int j=0; j< nodesPerHeight; ++j)
+                    if(shouldRecrystalize(i,j, neighbourhood) )
+                    {
+                        currentlyRecrystalized.Add(seedTab[i, j]);
+                        seedTab[i, j].setDislocationDensity(0);
+
+                       if(!seedTab[i, j].IsRecrystalized())
+                            drawDislocation(i,j);
+
+                        seedTab[i, j].setRecrystalized(true);
+                    }
+        }
+
+        private bool shouldRecrystalize(int x, int y, Neighbourhood neighbourhood)
+        {
+            List<GravityCell> neighbours = GetNeighbours(x, y, neighbourhood);
+            float sumaricDensity = getAllNeighboursDensity(x, y, neighbours);
+            if (sumaricDensity < seedTab[x, y].getDislocationDensity())
+            {
+                foreach (GravityCell neighbour in neighbours)
+                    if (neighbour.IsLastRecrystalized())
+                        return true;
+            }
+            return false;
+        }
+
+        private float getAllNeighboursDensity(int x, int y, List<GravityCell> neighbours)
+        {
+            float sumaricDensity = 0;
+            foreach (GravityCell neighbour in neighbours)
+            {
+                if (neighbour.IsLastRecrystalized())
+                    sumaricDensity -= neighbour.getDislocationDensity();
+                else
+                    sumaricDensity += neighbour.getDislocationDensity();
+            }
+            return sumaricDensity;
+        }
+
+        private bool IsOnTheBorder(int x, int y, List<GravityCell> neighbours)
+        {
+            foreach (GravityCell neighbour in neighbours)
+                if (neighbour.GetValue() != seedTab[x, y].GetValue())
+                    return true;
+
+            return false;
+        }
+
+        private float[] getMinAndMaxDensity()
+        {
+            float[] minMax = { 0, 0 };
+            for(int i =0; i< nodesPerWidth; ++i)
+                for(int j=0; j< nodesPerHeight; ++j)
+                {
+                    if (seedTab[i, j].getDislocationDensity() < minMax[0])
+                        minMax[0] = seedTab[i, j].getDislocationDensity();
+                    if (seedTab[i, j].getDislocationDensity() > minMax[1])
+                        minMax[1] = seedTab[i, j].getDislocationDensity();
+                }
+            return minMax;
+        }
+
+       
+
+        private List<GravityCell> getGrainsOnBorder(Neighbourhood neighbourhood)
+        {
+            List<GravityCell> grainsOnBorder = new List<GravityCell>();
+            for (int i = 0; i < nodesPerWidth; ++i)
+            for(int j=0; j< nodesPerHeight; ++j)
+                {
+                    if (IsOnTheBorder(i, j, GetNeighbours(i, j, neighbourhood)))
+                        grainsOnBorder.Add(seedTab[i, j]);
+                }
+
+            return grainsOnBorder;
+        }
+
+        private List<GravityCell> getGrainsInMiddle(Neighbourhood neighbourhood)
+        {
+            List<GravityCell> grainsInMiddle = new List<GravityCell>();
+            for (int i = 0; i < nodesPerWidth; ++i)
+                for (int j = 0; j < nodesPerHeight; ++j)
+                {
+                    if (!IsOnTheBorder(i, j, GetNeighbours(i, j, neighbourhood)))
+                        grainsInMiddle.Add(seedTab[i, j]);
+                }
+
+            return grainsInMiddle;
         }
 
 
-        private List<int> GetNeighboursValues(int x, int y, Neighbourhood neighbourhood)
+        private List<GravityCell> GetNeighbours(int x, int y, Neighbourhood neighbourhood)
         {
             VonNeuman vonNeuman = new VonNeuman(neighbourhood);
             Pentagonal pentagonal = new Pentagonal(neighbourhood);
             Hexagonal hexagonal = new Hexagonal(neighbourhood);
             Moore moore = new Moore(neighbourhood);
             CircularRadius circularRadius = new CircularRadius(neighbourhood);
-            List<int> neighboursValues = new List<int>();
+            List<GravityCell> neighbours = new List<GravityCell>();
             if (isNeuman)
-                neighboursValues = vonNeuman.GetNeighbourValues(x, y);
+                neighbours = vonNeuman.GetNeighbours(x, y);
             else if (isMoore)
-                neighboursValues = moore.GetNeighbourValues(x, y);
+                neighbours = moore.GetNeighbours(x, y);
             else if (isPentagonal)
             {
                 int pentaCase = random.Next(4);
-                neighboursValues = pentagonal.GetNeighbourValues(x, y, pentaCase);
+                neighbours = pentagonal.GetNeighbours(x, y, pentaCase);
             }
             else if (isHexagonal)
             {
@@ -266,25 +375,25 @@ namespace Zarodkowanie
                     hexaCase = 1;
                 if (rightHexaCheckBox.Checked)
                     hexaCase = 0;
-                neighboursValues = hexagonal.GetNeighbourValues(x, y, hexaCase);
+                neighbours = hexagonal.GetNeighbours(x, y, hexaCase);
             }
             else if (isCircularRadius)
-                neighboursValues = circularRadius.GetNeighbourValues(x, y);
+                neighbours = circularRadius.GetNeighbours(x, y);
 
-            return neighboursValues;
+            return neighbours;
         }
 
 
         private int CountEnergy(int x, int y, Neighbourhood neighbourhood)
         {
 
-            List<int> neighboursValues = GetNeighboursValues(x, y, neighbourhood);
+            List<GravityCell> neighbours = GetNeighbours(x, y, neighbourhood);
 
             int boundaryEnergy = 1;
             int kronckerNeighboursValue = 0;
-            for (int i = 0; i < neighboursValues.Count; ++i)
+            for (int i = 0; i < neighbours.Count; ++i)
             {
-                kronckerNeighboursValue += (1 - countDeltaKroneckera(seedTab[x, y].GetValue(), neighboursValues[i]));
+                kronckerNeighboursValue += (1 - countDeltaKroneckera(seedTab[x, y].GetValue(), neighbours[i].GetValue()));
             }
             int energy = boundaryEnergy * kronckerNeighboursValue;
             return energy;
@@ -299,11 +408,11 @@ namespace Zarodkowanie
         private void MonteCarlo(int x, int y, Neighbourhood neighbourhood)
         {
             int startValue = seedTab[x, y].GetValue();
-            List<int> neighboursValues = GetNeighboursValues(x, y, neighbourhood);
-            int r = random.Next(neighboursValues.Count);
+            List<GravityCell> neighbours = GetNeighbours(x, y, neighbourhood);
+            int r = random.Next(neighbours.Count);
             int prevEne = CountEnergy(x, y, neighbourhood);
 
-            seedTab[x, y].SetValue(neighboursValues[r]);
+            seedTab[x, y].SetValue(neighbours[r].GetValue());
             int newEne = CountEnergy(x, y, neighbourhood);
 
             double kt = (double)ktSelector.Value;
@@ -353,8 +462,11 @@ namespace Zarodkowanie
         {
             Neighbourhood neighbourhood = new Neighbourhood(grains, isPeriodic, nodesPerWidth, nodesPerHeight, seedTab, seedTabNew);
             double time = START_TIME;
+            CRITICAL_DISLOCATION /= ((nodesPerWidth) * (nodesPerHeight));
             String path = @"C:\Users\Kasia\source\repos\Zarodkowanie\Zarodkowanie\";
-            String fileName = "plik.txt";
+            String fileName = "plik.csv";
+            grainsOnBorder = getGrainsOnBorder(neighbourhood);
+            grainsInMiddle = getGrainsInMiddle(neighbourhood);
 
             using (System.IO.FileStream fs = System.IO.File.Create(path + fileName))
             {
@@ -365,24 +477,35 @@ namespace Zarodkowanie
             }
 
             StreamWriter sw = new StreamWriter(path + fileName);
-            sw.Write("{0,-15}", "Time");
-            sw.Write("{0,-15}", "Sigma");
-            sw.Write("{0,-15}\n", "Ro");
-            do
+            sw.Write("Time;");
+            sw.Write("Normalne;");
+            sw.Write( "Moje;");
+            sw.Write("Rodzdzielone\n");
+            BackgroundWorker backgroundWorker = new BackgroundWorker();
+            backgroundWorker.WorkerReportsProgress = true;
+            backgroundWorker.ProgressChanged += new ProgressChangedEventHandler((senders, args) =>
             {
-                sw.Write("{0,-15}", time);
-                CountDislocation(time, sw);
-                CountAverageDislocation(time, neighbourhood, sw);
-                time += DELTA_TIME;
+                iteracjaTextBox.Text = time.ToString();
 
-                for (int i = 0; i < nodesPerWidth; ++i)
-                    for (int j = 0; j < nodesPerHeight; ++j)
-                    {
-                        DrawCurrent(i, j);
-                    }
-            } while (time <= END_TIME);
-            sw.Close();
+            });
 
+            backgroundWorker.DoWork += new DoWorkEventHandler((senders, args) =>
+            {
+                do
+                {
+                    backgroundWorker.ReportProgress(0);
+
+                    sw.Write(time + ";");
+                    CountDislocation(time, neighbourhood, sw);
+                    time += DELTA_TIME;
+                    System.Threading.Thread.Sleep(10);
+
+                } while (time <= END_TIME);
+                sw.Close();
+            });
+
+            backgroundWorker.RunWorkerAsync();
+           
         }
 
         private void NextButton_Click(object sender, EventArgs e)
@@ -658,9 +781,9 @@ namespace Zarodkowanie
         {
             if(seedTab[x,y].GetValue() == 0)
             {
-                int r = random.Next(10, 245);
-                int g = random.Next(10, 245);
-                int b = random.Next(10, 245);
+                int r = random.Next(10, 225);
+                int g = random.Next(10, 225);
+                int b = random.Next(10, 225);
                 int[] color = { r, g, b };
 
                 Grain grain = new Grain(grains.Count + 1, color, x, y);
@@ -725,6 +848,63 @@ namespace Zarodkowanie
             }
         }
 
+
+        private void showDensityButton_Click(object sender, EventArgs e)
+        {
+            for (int i = 0; i < nodesPerWidth; ++i)
+                for (int j = 0; j < nodesPerHeight; ++j)
+                {
+                    DrawDensityDislocation(i,j);
+                }
+        }
+
+        private void DrawDensityDislocation(int x, int y)
+        {
+            float min = CRITICAL_DISLOCATION- 100000;
+            float max = getMinAndMaxDensity()[1];
+            int red = 0, green = 0, blue = 0;
+            float diff = (max - min) / 10;
+
+            if (seedTab[x, y].getDislocationDensity() < min)
+            {
+                red = 140; green = 184; blue = 255;
+            }
+            else
+            {
+                for (int i = 0; i < 10; ++i)
+                {
+                    if (seedTab[x, y].getDislocationDensity() >= (min + diff * (i)) && seedTab[x, y].getDislocationDensity() < (min + diff * (i + 1)))
+                    {
+                        red = 0;
+                        green = (255 - (i * 20));
+                        blue = 10;
+                    }
+                }
+            }
+
+            SolidBrush densityBrush = new SolidBrush(Color.FromArgb(red, green, blue));
+
+            if (wantGrid)
+                g.FillRectangle(densityBrush, (x * PIXEL_SIZE + 1), (y * PIXEL_SIZE + 1), PIXEL_SIZE - 1, PIXEL_SIZE - 1);
+            else
+                g.FillRectangle(densityBrush, (x * PIXEL_SIZE), (y * PIXEL_SIZE), PIXEL_SIZE, PIXEL_SIZE);
+        }
+
+        private void drawDislocation(int x, int y)
+        {
+            int r = random.Next(0, 255);
+            int gr = 0;
+            int b = 0;
+
+           SolidBrush dislocationBrush = new SolidBrush(Color.FromArgb(r, gr, b));
+
+
+            if (wantGrid)
+                g.FillRectangle(dislocationBrush, (x * PIXEL_SIZE + 1), (y * PIXEL_SIZE +1), PIXEL_SIZE - 1, PIXEL_SIZE - 1);
+            else
+                g.FillRectangle(dislocationBrush, (x * PIXEL_SIZE), (y * PIXEL_SIZE), PIXEL_SIZE, PIXEL_SIZE);
+        }
+
         private void DrawCurrent( int x, int y)
         {
             if (seedTab[x, y].GetValue() != 0)
@@ -735,10 +915,7 @@ namespace Zarodkowanie
                 else
                     g.FillRectangle(grains[val - 1].GetBrush(), (x * PIXEL_SIZE ), (y * PIXEL_SIZE ), PIXEL_SIZE , PIXEL_SIZE);
             }
-            if (seedTab[x, y].getDislocationDensity() >= CRITICAL_DISLOCATION)
-            {
-                g.FillRectangle(blackBrush, (x * PIXEL_SIZE + PIXEL_SIZE / 2), (y * PIXEL_SIZE + PIXEL_SIZE / 2), 2, 2);
-            }
+           
         }
 
         private void DrawCurrentTab(GravityCell[,] tab, int x, int y)
