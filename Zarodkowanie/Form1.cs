@@ -276,8 +276,7 @@ namespace Zarodkowanie
         private bool shouldRecrystalize(int x, int y, Neighbourhood neighbourhood)
         {
             List<GravityCell> neighbours = GetNeighbours(x, y, neighbourhood);
-            float sumaricDensity = getAllNeighboursDensity(x, y, neighbours);
-            if (sumaricDensity < seedTab[x, y].getDislocationDensity())
+            if (!IsBigger(x,y, neighbours))
             {
                 foreach (GravityCell neighbour in neighbours)
                     if (neighbour.IsLastRecrystalized())
@@ -286,17 +285,14 @@ namespace Zarodkowanie
             return false;
         }
 
-        private float getAllNeighboursDensity(int x, int y, List<GravityCell> neighbours)
+        private bool IsBigger(int x, int y, List<GravityCell> neighbours)
         {
-            float sumaricDensity = 0;
             foreach (GravityCell neighbour in neighbours)
             {
-                if (neighbour.IsLastRecrystalized())
-                    sumaricDensity -= neighbour.getDislocationDensity();
-                else
-                    sumaricDensity += neighbour.getDislocationDensity();
+                if (neighbour.getDislocationDensity() >= seedTab[x, y].getDislocationDensity())
+                    return true;
             }
-            return sumaricDensity;
+            return false;
         }
 
         private bool IsOnTheBorder(int x, int y, List<GravityCell> neighbours)
@@ -858,9 +854,11 @@ namespace Zarodkowanie
                 }
         }
 
+
+
         private void DrawDensityDislocation(int x, int y)
         {
-            float min = CRITICAL_DISLOCATION- 100000;
+            float min = CRITICAL_DISLOCATION/2;
             float max = getMinAndMaxDensity()[1];
             int red = 0, green = 0, blue = 0;
             float diff = (max - min) / 10;
@@ -873,7 +871,7 @@ namespace Zarodkowanie
             {
                 for (int i = 0; i < 10; ++i)
                 {
-                    if (seedTab[x, y].getDislocationDensity() >= (min + diff * (i)) && seedTab[x, y].getDislocationDensity() < (min + diff * (i + 1)))
+                    if (seedTab[x, y].getDislocationDensity() >= (min + diff * (i)) )
                     {
                         red = 0;
                         green = (255 - (i * 20));
@@ -1417,7 +1415,5 @@ namespace Zarodkowanie
                 }
             }
         }
-
-        
     }
 }

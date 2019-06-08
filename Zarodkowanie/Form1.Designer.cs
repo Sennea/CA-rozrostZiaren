@@ -40,6 +40,7 @@
             this.ktSelector = new System.Windows.Forms.NumericUpDown();
             this.label7 = new System.Windows.Forms.Label();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.showDensityButton = new System.Windows.Forms.Button();
             this.iteracjaTextBox = new System.Windows.Forms.TextBox();
             this.label9 = new System.Windows.Forms.Label();
             this.dislocationButton = new System.Windows.Forms.Button();
@@ -86,7 +87,7 @@
             this.nextButton = new System.Windows.Forms.Button();
             this.previousButton = new System.Windows.Forms.Button();
             this.tabControl1 = new System.Windows.Forms.TabControl();
-            this.showDensityButton = new System.Windows.Forms.Button();
+            this.groupBox9 = new System.Windows.Forms.GroupBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.groupBox8.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.ktSelector)).BeginInit();
@@ -106,6 +107,7 @@
             this.groupBox2.SuspendLayout();
             this.groupBox6.SuspendLayout();
             this.tabControl1.SuspendLayout();
+            this.groupBox9.SuspendLayout();
             this.SuspendLayout();
             // 
             // pictureBox1
@@ -239,10 +241,7 @@
             // 
             // tabPage2
             // 
-            this.tabPage2.Controls.Add(this.showDensityButton);
-            this.tabPage2.Controls.Add(this.iteracjaTextBox);
-            this.tabPage2.Controls.Add(this.label9);
-            this.tabPage2.Controls.Add(this.dislocationButton);
+            this.tabPage2.Controls.Add(this.groupBox9);
             this.tabPage2.Controls.Add(this.groupBox8);
             this.tabPage2.Controls.Add(this.showGravityButton);
             this.tabPage2.Controls.Add(this.energyButton);
@@ -254,17 +253,28 @@
             this.tabPage2.Text = "tabPage2";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
+            // showDensityButton
+            // 
+            this.showDensityButton.BackColor = System.Drawing.Color.Turquoise;
+            this.showDensityButton.Location = new System.Drawing.Point(20, 77);
+            this.showDensityButton.Name = "showDensityButton";
+            this.showDensityButton.Size = new System.Drawing.Size(125, 36);
+            this.showDensityButton.TabIndex = 7;
+            this.showDensityButton.Text = "Density";
+            this.showDensityButton.UseVisualStyleBackColor = false;
+            this.showDensityButton.Click += new System.EventHandler(this.showDensityButton_Click);
+            // 
             // iteracjaTextBox
             // 
-            this.iteracjaTextBox.Location = new System.Drawing.Point(113, 372);
+            this.iteracjaTextBox.Location = new System.Drawing.Point(20, 150);
             this.iteracjaTextBox.Name = "iteracjaTextBox";
-            this.iteracjaTextBox.Size = new System.Drawing.Size(100, 26);
+            this.iteracjaTextBox.Size = new System.Drawing.Size(125, 26);
             this.iteracjaTextBox.TabIndex = 6;
             // 
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(23, 378);
+            this.label9.Location = new System.Drawing.Point(23, 127);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(62, 20);
             this.label9.TabIndex = 5;
@@ -272,12 +282,13 @@
             // 
             // dislocationButton
             // 
-            this.dislocationButton.Location = new System.Drawing.Point(17, 184);
+            this.dislocationButton.BackColor = System.Drawing.Color.SpringGreen;
+            this.dislocationButton.Location = new System.Drawing.Point(20, 34);
             this.dislocationButton.Name = "dislocationButton";
-            this.dislocationButton.Size = new System.Drawing.Size(75, 23);
+            this.dislocationButton.Size = new System.Drawing.Size(125, 36);
             this.dislocationButton.TabIndex = 4;
             this.dislocationButton.Text = "Dislocation";
-            this.dislocationButton.UseVisualStyleBackColor = true;
+            this.dislocationButton.UseVisualStyleBackColor = false;
             this.dislocationButton.Click += new System.EventHandler(this.dislocationButton_Click);
             // 
             // tabPage1
@@ -814,15 +825,19 @@
             this.tabControl1.Size = new System.Drawing.Size(438, 757);
             this.tabControl1.TabIndex = 18;
             // 
-            // showDensityButton
+            // groupBox9
             // 
-            this.showDensityButton.Location = new System.Drawing.Point(17, 229);
-            this.showDensityButton.Name = "showDensityButton";
-            this.showDensityButton.Size = new System.Drawing.Size(75, 23);
-            this.showDensityButton.TabIndex = 7;
-            this.showDensityButton.Text = "Density";
-            this.showDensityButton.UseVisualStyleBackColor = true;
-            this.showDensityButton.Click += new System.EventHandler(this.showDensityButton_Click);
+            this.groupBox9.BackColor = System.Drawing.Color.AntiqueWhite;
+            this.groupBox9.Controls.Add(this.dislocationButton);
+            this.groupBox9.Controls.Add(this.iteracjaTextBox);
+            this.groupBox9.Controls.Add(this.showDensityButton);
+            this.groupBox9.Controls.Add(this.label9);
+            this.groupBox9.Location = new System.Drawing.Point(131, 324);
+            this.groupBox9.Name = "groupBox9";
+            this.groupBox9.Size = new System.Drawing.Size(174, 198);
+            this.groupBox9.TabIndex = 8;
+            this.groupBox9.TabStop = false;
+            this.groupBox9.Text = "Dislocation";
             // 
             // Form1
             // 
@@ -840,7 +855,6 @@
             this.groupBox8.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.ktSelector)).EndInit();
             this.tabPage2.ResumeLayout(false);
-            this.tabPage2.PerformLayout();
             this.tabPage1.ResumeLayout(false);
             this.tabPage1.PerformLayout();
             this.groupBox5.ResumeLayout(false);
@@ -862,6 +876,8 @@
             this.groupBox2.PerformLayout();
             this.groupBox6.ResumeLayout(false);
             this.tabControl1.ResumeLayout(false);
+            this.groupBox9.ResumeLayout(false);
+            this.groupBox9.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -927,6 +943,7 @@
         private System.Windows.Forms.TextBox iteracjaTextBox;
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.Button showDensityButton;
+        private System.Windows.Forms.GroupBox groupBox9;
     }
 }
 
